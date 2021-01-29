@@ -10,8 +10,5 @@
 // +----------------------------------------------------------------------
 use think\facade\Route;
 
-Route::get('think', function () {
-    return 'hello,ThinkPHP6!';
-});
-
-Route::get('hello/:name', 'index/hello');
+Route::get('/login', '\app\controller\Login@index')->name('login');
+Route::post('/login', '\app\controller\Login@login')->name('login');

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="{@:env('lang.default_lang', config('lang.default_lang'))}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>
+        {@block name="title"}管理首页{@/block}
+    </title>
+    {@css href="__StaticVertical__/css/bootstrap.min.css"}
+    {@css href="__StaticVertical__/css/icons.min.css"}
+    {@css href="__StaticVertical__/css/app.min.css"}
+    <!--自定义样式-->
+    {@block name="style"}{@/block}
+    <!--自定义样式-->
+</head>
+<body>
+<!-- 主体内容 -->
+<!--<div id="wrapper">-->
+<div id="app">
+    {@include file="layout/_sidebar"}
+    <div class="content-page">
+        <div class="content">
+            {@include file="layout/_header"}
+            <!-- Start Content-->
+            <div class="container-fluid">
+                {@include file="layout/_pagetitle"}
+                {@block name="content"}{@/block}
+            </div>
+        </div>
+        {@include file="layout/_footer"}
+    </div>
+</div>
+<!--</div>-->
+<!-- 主体内容 end -->
+
+{@if(env('app_debug', config('app.show_error_msg')))}
+<!-- 开发版本VUE -->
+{@js href="__StaticLibVue__/vue.js"}
+{@else /}
+<!-- 生产版本VUE -->
+{@js href="__StaticLibVue__/vue.min.js"}
+{@/if}
+{@block name="vue-script"}
+<script>
+    const vm = new Vue({
+       el: '#app'
+    });
+</script>
+{@/block}
+<!-- App js -->
+{@js href="__StaticVertical__/js/vendor.min.js"}
+{@js href="__StaticVertical__/js/app.min.js"}
+{@block name="script"}{@/block}
+</body>
+</html>

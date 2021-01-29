@@ -15,11 +15,16 @@ return [
     // 模板文件名分隔符
     'view_depr'     => DIRECTORY_SEPARATOR,
     // 模板引擎普通标签开始标记
-    'tpl_begin'     => '{',
+    'tpl_begin'     => '{@',
     // 模板引擎普通标签结束标记
     'tpl_end'       => '}',
     // 标签库标签开始标记
-    'taglib_begin'  => '{',
+    'taglib_begin'  => '{@',
     // 标签库标签结束标记
     'taglib_end'    => '}',
+    // 输出替换
+    'tpl_replace_string'    => [
+        '__StaticVertical__'    => '/static/vertical',
+        '__StaticLibVue__'      => '/static/lib/vue@2.6.12'
+    ],
 ];
