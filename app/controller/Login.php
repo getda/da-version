@@ -42,6 +42,8 @@ class Login extends Base
 
     public function logout()
     {
-
+        $loginBusiness = new LoginBusiness();
+        $loginBusiness->logout();
+        return redirect((string) url('login'));
     }
 }

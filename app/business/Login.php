@@ -5,6 +5,7 @@ namespace app\business;
 use app\validate\Login as LoginValidate;
 use think\exception\ValidateException;
 use app\model\User as UserModel;
+use think\facade\Session;
 
 class Login extends Base
 {
@@ -55,5 +56,23 @@ class Login extends Base
 
         return [config('status.api.success'), '登录成功', [], url('center')];
 
+    }
+
+    /**
+     * 退出登录 delete
+     */
+    public function logout()
+    {
+        if(session('?user_id')) {
+            $userModel = new UserModel();
+            $id = session('user_id');
+            // remember_token 过期时间设置为 0
+            $userModel->updateInfoById($id, [
+                'remember_timeout'     => 0,
+            ]);
+        }
+        session('user_id', null);
+        cookie('remember', null);
+        Session::flash('success','退出登录成功');
     }
 }

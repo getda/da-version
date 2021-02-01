@@ -43,7 +43,7 @@
 
                                 <div class="form-group mb-3">
                                     <label for="captcha">验证码</label>
-                                    <input class="form-control" type="text" id="captcha" placeholder="请输入密码" v-model="loginForm.captcha" autocomplete="off">
+                                    <input class="form-control" type="text" id="captcha" placeholder="请输入密码" v-model="loginForm.captcha" @keyup.enter="onSubmitLogin" autocomplete="off">
                                 </div>
 
                                 <div class="form-group mb-3">
@@ -101,7 +101,7 @@
                     captcha: '',
                     remember: false,
                 },
-                captchaSrc: '{@:captcha_src()}',
+                captchaSrc: 'captcha.html',
                 isLoading: false,
             }
         },
@@ -122,7 +122,7 @@
                     toastr['success'](data.message);
                     setTimeout(()=>{
                         window.location.href = data.url;
-                    }, 1500)
+                    }, 1000)
                 })
                 .catch(error => {
                     this.isLoading = false;
@@ -149,6 +149,6 @@
 {@js href="__StaticVertical__/js/app.min.js"}
 {@js href="__StaticJS__/common.js"}
 
-{@include file="import/toastr"}
+{@include file="import/_message"}
 </body>
 </html>

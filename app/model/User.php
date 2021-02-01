@@ -22,7 +22,7 @@ class User extends Model
      */
     public function getInfoByUsername (string $username, string $field = '')
     {
-        return $this->where('username', $username)
+        return $this->where('username', '=', $username)
                     ->field($field)
                     ->findOrEmpty();
     }

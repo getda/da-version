@@ -1,0 +1,14 @@
+<script>
+    /* Toastr 插件 */
+    loadCSS('__StaticVertical__/css/vendor/toastr.min.css');
+    loadJS('__StaticVertical__/js/vendor/toastr.min.js');
+
+    {@foreach ['success', 'error', 'info', 'warning'] as $msg}
+        {@if(session('?'.$msg))}
+            /* 提示信息 */
+            setTimeout(function () {
+                toastr['{@$msg}']('{@:session($msg)}');
+            }, 100);
+        {@/if}
+    {@/foreach}
+</script>

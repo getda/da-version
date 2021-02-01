@@ -16,6 +16,8 @@ Route::get('/', '\app\controller\Index@index')->name('home');
 // 登录
 Route::get('/login', '\app\controller\Login@index')->name('login');
 Route::post('/login', '\app\controller\Login@login')->name('login');
+// 退出登录
+Route::delete('/logout', '\app\controller\Login@logout')->name('logout');
 
 // 管理中心首页
 Route::get('/center', '\app\controller\Index@center')->name('center');
