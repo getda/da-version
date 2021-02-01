@@ -21,3 +21,6 @@ Route::delete('/logout', '\app\controller\Login@logout')->name('logout');
 
 // 管理中心首页
 Route::get('/center', '\app\controller\Index@center')->name('center');
+
+// 用户管理 资源路由
+Route::resource('/user', '\app\controller\User')->name('user');

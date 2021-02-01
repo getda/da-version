@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     {@:token_meta()}
     <title>
-        {@block name="title"}管理首页{@/block}
+        {@block name="title"}{@$title|default='管理中心'}{@/block}
     </title>
     {@css href="__StaticVertical__/css/bootstrap.min.css"}
     {@css href="__StaticVertical__/css/icons.min.css"}

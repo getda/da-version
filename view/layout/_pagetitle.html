@@ -2,13 +2,13 @@
 <div class="row">
     <div class="col-12">
         <div class="page-title-box">
-            <div class="page-title-right">
+            <div class="page-title-right" {@empty name="title"}style='display:none;'{@/empty}>
                 <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="#">Simulor</a></li>
-                    <li class="breadcrumb-item active">Dashboard</li>
+                    <li class="breadcrumb-item"><a href="{@:url('center')}">面板首页</a></li>
+                    <li class="breadcrumb-item active">{@$title|default=''}</li>
                 </ol>
             </div>
-            <h4 class="page-title">Dashboard</h4>
+            <h4 class="page-title">{@$title|default='面板首页'}</h4>
         </div>
     </div>
 </div>
