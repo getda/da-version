@@ -5,6 +5,7 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {@:token_meta()}
     <title>
         {@block name="title"}管理首页{@/block}
     </title>
@@ -36,12 +37,15 @@
 <!-- 主体内容 end -->
 
 {@if(env('app_debug', config('app.show_error_msg')))}
-<!-- 开发版本VUE -->
+<!-- 开发版本 -->
 {@js href="__StaticLibVue__/vue.js"}
+{@js href="__StaticLibAxios__/axios.js"}
 {@else /}
-<!-- 生产版本VUE -->
+<!-- 生产版本 -->
 {@js href="__StaticLibVue__/vue.min.js"}
+{@js href="__StaticLibAxios__/axios.min.js"}
 {@/if}
+
 {@block name="vue-script"}
 <script>
     const vm = new Vue({
@@ -52,6 +56,7 @@
 <!-- App js -->
 {@js href="__StaticVertical__/js/vendor.min.js"}
 {@js href="__StaticVertical__/js/app.min.js"}
+{@js href="__StaticJS__/common.js"}
 {@block name="script"}{@/block}
 </body>
 </html>

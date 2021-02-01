@@ -3,84 +3,45 @@ declare (strict_types = 1);
 
 namespace app\controller;
 
+use app\controller\Base;
 use think\facade\View;
 use think\Request;
+use app\business\Login as LoginBusiness;
 
-class Login
+class Login extends Base
 {
     /**
-     * 登录 View
-     *
-     * @return \think\Response
+     * 登录页面
+     * @return string|\think\response\Redirect
      */
     public function index()
     {
+        if ($this->isLogin()) {
+            return redirect((string) url('center'));
+        }
         return View::fetch('login/index');
     }
 
     /**
-     * 登录
-     *
-     * @return \think\Response
+     * 登录 post
+     * @param Request $request
+     * @return \think\response\Json
      */
-    public function login()
+    public function login(Request $request)
     {
-        return 'login post';
+        $request->filter(['trim', 'strip_tags']);
+        $param = $request->param(['username', 'password', 'captcha', 'remember']);
+        $token = $request->header('X-CSRF-TOKEN');
+        if ($token) {
+            $param['__token__'] = $token;
+        }
+
+        $loginBusiness = new LoginBusiness();
+        return $this->apiReturn($loginBusiness->login($param));
     }
 
-    /**
-     * 保存新建的资源
-     *
-     * @param  \think\Request  $request
-     * @return \think\Response
-     */
-    public function save(Request $request)
+    public function logout()
     {
-        //
-    }
 
-    /**
-     * 显示指定的资源
-     *
-     * @param  int  $id
-     * @return \think\Response
-     */
-    public function read($id)
-    {
-        //
-    }
-
-    /**
-     * 显示编辑资源表单页.
-     *
-     * @param  int  $id
-     * @return \think\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * 保存更新的资源
-     *
-     * @param  \think\Request  $request
-     * @param  int  $id
-     * @return \think\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * 删除指定资源
-     *
-     * @param  int  $id
-     * @return \think\Response
-     */
-    public function delete($id)
-    {
-        //
     }
 }

@@ -24,7 +24,10 @@ return [
     'taglib_end'    => '}',
     // 输出替换
     'tpl_replace_string'    => [
+        '__StaticCSS__'         => '/static/css',
+        '__StaticJS__'          => '/static/js',
         '__StaticVertical__'    => '/static/vertical',
-        '__StaticLibVue__'      => '/static/lib/vue@2.6.12'
+        '__StaticLibVue__'      => '/static/lib/vue@2.6.12',
+        '__StaticLibAxios__'    => '/static/lib/axios@0.21.1'
     ],
 ];

@@ -13,7 +13,7 @@ return [
     // 是否开启路由延迟解析
     'url_lazy_route'        => false,
     // 是否强制使用路由
-    'url_route_must'        => false,
+    'url_route_must'        => true,
     // 合并路由规则
     'route_rule_merge'      => false,
     // 路由是否完全匹配
@@ -35,7 +35,7 @@ return [
     // 默认控制器名
     'default_controller'    => 'Index',
     // 默认操作名
-    'default_action'        => 'index',
+    'default_action'        => 'static_page',
     // 操作方法后缀
     'action_suffix'         => '',
     // 默认JSONP格式返回的处理方法
