@@ -2,24 +2,19 @@
 <html lang="{@:env('lang.default_lang', config('lang.default_lang'))}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     {@:token_meta()}
     <title>
         {@block name="title"}{@$title|default='管理中心'}{@/block}
     </title>
-    {@css href="__StaticVertical__/css/bootstrap.min.css"}
-    {@css href="__StaticVertical__/css/icons.min.css"}
-    {@css href="__StaticVertical__/css/app.min.css"}
+    {@include file="layout/_style"}
     <!--自定义样式-->
     {@block name="style"}{@/block}
-    <!--自定义样式-->
 </head>
 <body>
 <!-- 主体内容 -->
 <!--<div id="wrapper">-->
-<div id="app">
+<div id="app" v-cloak>
     {@include file="layout/_sidebar"}
     <div class="content-page">
         <div class="content">
@@ -35,29 +30,18 @@
 </div>
 <!--</div>-->
 <!-- 主体内容 end -->
-
-{@if(env('app_debug', config('app.show_error_msg')))}
-<!-- 开发版本 -->
-{@js href="__StaticLibVue__/vue.js"}
-{@js href="__StaticLibAxios__/axios.js"}
-{@else /}
-<!-- 生产版本 -->
-{@js href="__StaticLibVue__/vue.min.js"}
-{@js href="__StaticLibAxios__/axios.min.js"}
-{@/if}
-
+{@include file="layout/_vue-script"}
 {@block name="vue-script"}
 <script>
     const vm = new Vue({
-       el: '#app'
+        el: '#app',
+        data: {
+            fullscreenLoading: false,
+        }
     });
 </script>
 {@/block}
-<!-- App js -->
-{@js href="__StaticVertical__/js/vendor.min.js"}
-{@js href="__StaticVertical__/js/app.min.js"}
-{@js href="__StaticJS__/common.js"}
-{@include file="import/_message"}
+{@include file="layout/_other-script"}
 {@block name="script"}{@/block}
 </body>
 </html>

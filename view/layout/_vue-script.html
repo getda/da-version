@@ -1,0 +1,14 @@
+{@if(env('app_debug', config('app.show_error_msg')))}
+<!-- 开发版本 -->
+{@js href="__StaticLibVue__/vue.js"}
+{@js href="__StaticLibAxios__/axios.js"}
+{@else /}
+<!-- 生产版本 -->
+{@js href="__StaticLibVue__/vue.min.js"}
+{@js href="__StaticLibAxios__/axios.min.js"}
+{@/if}
+{@js href="__StaticJS__/axios.config.js"}
+{@js href="__StaticEle__/index.js"}
+
+
+

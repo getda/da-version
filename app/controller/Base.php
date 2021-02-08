@@ -23,7 +23,7 @@ class Base extends BaseController
      * @param array $header
      * @return \think\response\Json
      */
-    public function apiReturn ($code, $message = 'error', $data = [], $url = '', $httpCode = 200, $header = [])
+    public function apiReturn ($code, $message = 'ok', $data = [], $url = '', $httpCode = 200, $header = [])
     {
 
         if(is_array($code)) {

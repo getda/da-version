@@ -64,8 +64,8 @@ class Login extends Base
     public function logout()
     {
         if(session('?user_id')) {
-            $userModel = new UserModel();
             $id = session('user_id');
+            $userModel = new UserModel();
             // remember_token 过期时间设置为 0
             $userModel->updateInfoById($id, [
                 'remember_timeout'     => 0,

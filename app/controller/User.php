@@ -5,8 +5,9 @@ namespace app\controller;
 
 use think\Request;
 use think\facade\View;
+use app\business\User as UserBusiness;
 
-class User
+class User extends Base
 {
     /**
      * 显示资源列表
@@ -17,6 +18,24 @@ class User
         return View::fetch('user/index',[
             'title' => '用户管理'
         ]);
+    }
+
+    public function list(Request $request)
+    {
+        $request->filter(['trim', 'strip_tags']);
+        $param = $request->param(['username', 'status', 'is_admin', 'page_size', 'page_current']);
+        $token = $request->header('X-CSRF-TOKEN');
+        if ($token) {
+            $param['__token__'] = $token;
+        }
+
+        // 默认每页显示数量
+        $param['page_size'] = $param['page_size'] ?? 10;
+        // 默认当前页
+        $param['page_current'] = $param['page_current'] ?? 1;
+
+        $userBusiness = new UserBusiness();
+        return $this->apiReturn($userBusiness->list($param));
     }
 
     /**
@@ -37,7 +56,11 @@ class User
      */
     public function save(Request $request)
     {
-        //
+        $request->filter(['trim', 'strip_tags']);
+        $param = $request->param(['username', 'password', 'email', 'contact', 'is_admin', 'status']);
+
+        $userBusiness = new UserBusiness();
+        return $this->apiReturn($userBusiness->save($param));
     }
 
     /**
@@ -71,7 +94,11 @@ class User
      */
     public function update(Request $request, $id)
     {
-        //
+        $request->filter(['trim', 'strip_tags']);
+        $param = $request->param(['id', 'username', 'password', 'email', 'contact', 'is_admin', 'status']);
+
+        $userBusiness = new UserBusiness();
+        return $this->apiReturn($userBusiness->update($param));
     }
 
     /**
@@ -82,6 +109,21 @@ class User
      */
     public function delete($id)
     {
-        //
+        $userBusiness = new UserBusiness();
+        return $this->apiReturn($userBusiness->delete($id));
+    }
+
+    /**
+     * 批量删除资源
+     * @param Request $request
+     * @return \think\response\Json
+     */
+    public function deletion(Request $request)
+    {
+        $request->filter(['trim', 'strip_tags']);
+        $param = $request->param(['ids']);
+
+        $userBusiness = new UserBusiness();
+        return $this->apiReturn($userBusiness->delete($param['ids']));
     }
 }

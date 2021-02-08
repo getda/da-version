@@ -28,6 +28,7 @@ return [
         '__StaticJS__'          => '/static/js',
         '__StaticVertical__'    => '/static/vertical',
         '__StaticLibVue__'      => '/static/lib/vue@2.6.12',
-        '__StaticLibAxios__'    => '/static/lib/axios@0.21.1'
+        '__StaticLibAxios__'    => '/static/lib/axios@0.21.1',
+        '__StaticEle__'         => '/static/lib/element@2.15.0'
     ],
 ];

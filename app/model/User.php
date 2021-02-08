@@ -8,9 +8,9 @@ class User extends Model
 {
     // JSON 字段
     protected $json = ['contact'];
+    // 增加字段
+    protected $append = ['is_admin_text', 'status_text'];
 
-    // 允许写入字段
-    protected $field = ['username', 'password', 'remember_token'];
     /**
      * 根据用户名查询用户信息
      * @param $username
@@ -60,7 +60,7 @@ class User extends Model
      */
     public function hasRememberToken($token)
     {
-        return !$this->field('remember_token')
+        return $this->field('remember_token')
                     ->where('remember_token', $token)
                     ->whereTime('remember_timeout', '>', time())
                     ->findOrEmpty()
@@ -84,5 +84,69 @@ class User extends Model
     {
         return $this->where('id', $id)
                     ->update($data);
+    }
+
+    /**
+     * username 搜索器
+     * @param $query
+     * @param $value
+     */
+    public function searchUsernameAttr($query, $value)
+    {
+        $value ? $query->whereLike('username', '%'. $value .'%') : '';
+    }
+
+    /**
+     * status 搜索器
+     * @param $query
+     * @param $value
+     */
+    public function searchStatusAttr($query, $value = null)
+    {
+        $value !== null ? $query->whereIn('status', $value) : '';
+    }
+
+    /**
+     * is_admin 搜索器
+     * @param $query
+     * @param $value
+     */
+    public function searchIsAdminAttr($query, $value = null)
+    {
+        $value !== null ? $query->whereIn('is_admin', $value) : '';
+    }
+
+    /**
+     * last_login_time 获取器
+     * @param $value
+     * @return false|string
+     */
+    public function getLastLoginTimeAttr($value)
+    {
+        return date('Y-m-d H:i:s', $value);
+    }
+
+    /**
+     * status_text 虚拟字段获取器
+     * @param $value
+     * @param $data
+     * @return string
+     */
+    public function getStatusTextAttr($value, $data)
+    {
+        $array = [0 => '禁用', 1 => '正常'];
+        return $array[$data['status']];
+    }
+
+    /**
+     * is_admin_text 虚拟字段获取器
+     * @param $value
+     * @param $data
+     * @return string
+     */
+    public function getIsAdminTextAttr($value, $data)
+    {
+        $array = [0 => '普通用户', 1 => '管理员'];
+        return $array[$data['is_admin']];
     }
 }

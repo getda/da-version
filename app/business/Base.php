@@ -18,6 +18,17 @@ class Base
         return $salt . $password . $salt;
     }
 
+    public function beSalt($num = 8)
+    {
+        $str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
+        $init_salt = "";
+        for ($i = 0; $i < $num; $i++) {
+            $init_salt .= substr($str, rand(0, strlen($str) - 1), 1);
+        }
+
+        return $init_salt;
+    }
+
     /**
      * 密码匹配
      * @param string $current_password 当前密码 (已加密)
@@ -42,6 +53,7 @@ class Base
      * 执行登录
      * @param int $id
      * @param bool $is_remember
+     * @return bool
      */
     public function runLogin(int $id = 0, $is_remember = false)
     {
@@ -62,17 +74,21 @@ class Base
             }
             // session 存储用户信息
             Session::set('user_id', $user_info->id);
+            return true;
         } else {
             if(Cookie::has('remember')) {
                 $remember_token = Cookie::get('remember');
                 $is_remember_token = $userModel->hasRememberToken($remember_token);
                 // 如果持久登录 token 存在则直接登录
                 if($is_remember_token) {
-                    $user_info = $userModel->getInfoById($id, 'id');
+                    $user_info = $userModel->getInfoByRememberToken($remember_token, 'id');
                     // session 存储用户信息
                     Session::set('user_id', $user_info->id);
+                    return true;
                 }
             }
+            Cookie::delete('remember');
+            return false;
         }
     }
 
@@ -86,19 +102,7 @@ class Base
         if(Session::has('user_id')) {
             return true;
         }
-        // 根据 cookie 判断是否是有效身份, 且保持登录
-        $remember_token = Cookie::get('remember');
-        if($remember_token) {
-            $userModel = new User();
-            $is_remember = $userModel->hasRememberToken($remember_token);
-
-            if($is_remember) {
-                $this->runLogin();
-                return $is_remember;
-            }
-            Cookie::delete('remember');
-        }
-        return false;
+        return $this->runLogin();
     }
 
 }

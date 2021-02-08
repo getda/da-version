@@ -1,19 +1,490 @@
 {@extend name="layout/default"}
 
 {@block name="content"}
-    用户管理
+<el-card class="box-card" shadow="never" style="border-bottom-left-radius: 0;border-bottom-right-radius: 0;margin-bottom: -1px;">
+    <el-row :gutter="10">
+        <el-col
+                :xs="24"
+                :sm="13">
+            <el-button-group style="margin-bottom: 10px;">
+                <el-button type="primary" size="medium" @click="dialogForm">新增</el-button>
+                <el-button type="info" size="medium" @click="restFilters">重置</el-button>
+                <el-button type="danger"
+                           size="medium"
+                           @click="deletionData"
+                           :disabled="deleteDisabled">删除</el-button>
+            </el-button-group>
+        </el-col>
+        <el-col
+                :xs="24"
+                :sm="11"
+                :md="8"
+                :lg="5"
+                :xl="4"
+                style="float: right;">
+            <el-input placeholder="用户名搜索"
+                      v-model="search"
+                      size="medium"
+                      maxlength="20"
+                      clearable
+                      @change="searchSubmit"
+                      prefix-icon="el-icon-search"
+                      class="input-with-select">
+                <el-button size="mini" slot="append" icon="el-icon-search"></el-button>
+            </el-input>
+        </el-col>
+    </el-row>
+</el-card>
+<el-table
+        v-loading="listLoading"
+        :data="tableData"
+        @filter-change="handleFilterChange"
+        @selection-change="handleSelectionChange"
+        border
+        stripe
+        style="width: 100%">
+    <el-table-column
+            type="selection"
+            align="center"
+            width="40">
+    </el-table-column>
+    <el-table-column
+            prop="username"
+            label="用户名"
+            width="100">
+    </el-table-column>
+    <el-table-column
+            prop="email"
+            label="邮箱"
+            width="200">
+    </el-table-column>
+    <el-table-column
+            prop="contact"
+            align="center"
+            label="联系方式"
+            width="80">
+        <template slot-scope="scope">
+            <el-popover trigger="click" placement="left">
+                <div v-html="contact(scope.row.contact)"></div>
+                <div slot="reference" class="name-wrapper" style="cursor:pointer;">
+                    <el-tag
+                            size="mini"
+                            effect="dark">查看</el-tag>
+                </div>
+            </el-popover>
+        </template>
+    </el-table-column>
+    <el-table-column
+            prop="is_admin"
+            label="权限"
+            :filters="isAdminFilter"
+            column-key="is_admin"
+            filter-placement="bottom"
+            align="center"
+            width="100">
+        <template slot-scope="scope">
+            <el-tag
+                    size="mini"
+                    :type="scope.row.is_admin == '1' ? 'primary' : 'info'"
+                    disable-transitions>{{scope.row.is_admin_text}}</el-tag>
+        </template>
+    </el-table-column>
+    <el-table-column
+            prop="status"
+            label="状态"
+            :filters="statusFilter"
+            column-key="status"
+            filter-placement="bottom"
+            align="center"
+            width="100">
+        <template slot-scope="scope">
+            <el-tag
+                    size="mini"
+                    :type="scope.row.status == '1' ? 'success' : 'danger'"
+                    disable-transitions>{{scope.row.status_text}}</el-tag>
+        </template>
+    </el-table-column>
+    <el-table-column
+            prop="last_login_ip"
+            label="最后登录IP"
+            align="center"
+            width="150">
+    </el-table-column>
+    <el-table-column
+            prop="last_login_time"
+            label="最后登录时间"
+            sortable
+            align="center"
+            width="180">
+    </el-table-column>
+    <el-table-column
+            prop="create_time"
+            label="创建时间"
+            sortable
+            align="center"
+            width="180">
+    </el-table-column>
+    <el-table-column
+            fixed="right"
+            align="center"
+            label="操作"
+            min-width="100">
+        <template slot-scope="scope">
+            <el-button
+                    size="mini"
+                    type="primary"
+                    icon="el-icon-edit"
+                    @click="dialogForm(scope.row)"
+                    circle></el-button>
+            <el-button
+                    size="mini"
+                    type="danger"
+                    @click="deleteData(scope.row)"
+                    icon="el-icon-delete"
+                    circle></el-button>
+        </template>
+    </el-table-column>
+</el-table>
+<el-row>
+    <el-col :span="24">
+        <el-card class="box-card" shadow="never" style="border-top-left-radius: 0;border-top-right-radius: 0;">
+            <el-pagination
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page.sync="page.current"
+                    :page-sizes="[10, 20, 30, 40, 50, 100, 200]"
+                    :page-size="page.size"
+                    :pager-count="5"
+                    background
+                    prev-text="上页"
+                    next-text="下页"
+                    layout="total, sizes, ->, prev, pager, next, jumper"
+                    :total="page.total">
+            </el-pagination>
+        </el-card>
+    </el-col>
+</el-row>
+
+<!--数据新增修改表单-->
+<el-dialog :title="dialogTitle"
+           top="1rem"
+           :close-on-click-modal="false"
+           :visible.sync="dialogFormVisible">
+    <el-form :model="form"
+             label-position="left"
+             size="mini">
+        <el-row :gutter="10">
+            <el-col :xs="24" :sm="12">
+                <el-form-item label="用户名" label-width="auto" prop="username" :error="formErrorMsg.username">
+                    <el-input type="text" v-model="form.username" autocomplete="off"></el-input>
+                </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+                <el-form-item label="密码" label-width="auto" prop="password" :error="formErrorMsg.password">
+                    <el-input type="text" v-model="form.password" autocomplete="off"></el-input>
+                </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+                <el-form-item label="邮箱" label-width="auto" prop="email" :error="formErrorMsg.email">
+                    <el-input type="email" v-model="form.email" autocomplete="off"></el-input>
+                </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+                <el-form-item label="ＱＱ" label-width="auto" prop="contact.qq" :error="formErrorMsg['contact.qq']">
+                    <el-input type="text" v-model="form.contact.qq" autocomplete="off"></el-input>
+                </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+                <el-form-item label="微信" label-width="auto" prop="contact.wx" :error="formErrorMsg['contact.wx']">
+                    <el-input type="text" v-model="form.contact.wx" autocomplete="off"></el-input>
+                </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+                <el-form-item label="手机" label-width="auto" prop="contact.phone" :error="formErrorMsg['contact.phone']">
+                    <el-input type="text" v-model="form.contact.phone" autocomplete="off"></el-input>
+                </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+                <el-form-item label="权限" label-width="auto" prop="is_admin" :error="formErrorMsg.is_admin">
+                    <el-radio-group
+                            v-model="form.is_admin" style="width: 100%">
+                        <el-radio :label="0">普通用户</el-radio>
+                        <el-radio :label="1">管理员</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12">
+                <el-form-item label="状态" label-width="auto" prop="status" :error="formErrorMsg.status">
+                    <el-radio-group v-model="form.status" style="width: 100%">
+                        <el-radio :label="0">禁用</el-radio>
+                        <el-radio :label="1">启用</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+            </el-col>
+        </el-row>
+    </el-form>
+    <div slot="footer" class="dialog-footer" v-loading="formLoading">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogFormSubmit(form)">确 定</el-button>
+    </div>
+</el-dialog>
 {@/block}
 
 {@block name="vue-script"}
 <script>
     const vm = new Vue({
         el: '#app',
-        data: {
+        data() {
+            return {
+                // list loading
+                listLoading: false,
+                // form loading
+                formLoading: false,
+                // 表单数据
+                tableData:[],
+                // 分页配置
+                page: {
+                    current: 1,
+                    total: 1,
+                    size: 10,
+                },
+                // 筛选条件
+                filters: { },
+                // 多选内容
+                multipleData: [],
+                // 搜索内容
+                search: "",
+                // 删除按钮状态
+                deleteDisabled: true,
+                // 新增/修改表单
+                dialogFormVisible: false,
+                // dialog 标题
+                dialogTitle: "新增用户",
+                // 表单提交所需参数
+                formSubmitConfig: {
+                    url: "",
+                    method: ""
+                },
+                // 表单提交地址
+                formUrl: "",
+                // 表单数据
+                form: {
+                    username: "",
+                    password: "",
+                    email: "",
+                    contact: { },
+                    is_admin: 0,
+                    status: 1
 
+                },
+                // 存储错误信息
+                formErrorMsg: { },
+            }
+        },
+        methods: {
+            // 获取数据列表
+            getList(data = {}) {
+                this.listLoading = true;
+                axios.post("/user/list", data)
+                .then(response => {
+                    let data = response.data;
+                    if(data.code !== 1) {
+                        this.$message.error(data.message);
+                        this.listLoading = false;
+                        return ;
+                    }
+                    this.tableData = data.data.data;
+                    this.page.current = data.data.current_page;
+                    this.page.total = data.data.total;
+                    this.page.size = data.data.per_page;
+                    this.listLoading = false;
+                })
+                .catch(error => {
+                    this.listLoading = false;
+                    this.$message.error("数据加载失败");
+                });
+            },
+            // 数据通过服务端筛选
+            handleFilterChange(filters){
+                // 获取筛选键名
+                let key = Object.keys(filters)[0];
+                if((filters[key]).length > 0) {
+                    // 如果有筛选条件将条件转为字符串以逗号分割
+                    this.filters[key] = filters[key].join(",");
+                } else {
+                    // 删除当前筛选条件
+                    delete this.filters[key];
+                }
+                // 筛选后初始化列表至首页
+                this.filters.page_current = 1;
+                this.page.current = 1;
+                this.getList(this.filters);
+            },
+            // 每页条数监听
+            handleSizeChange(value) {
+                this.filters.page_size = value;
+                this.getList(this.filters);
+            },
+            // 当前页数监听
+            handleCurrentChange(value) {
+                this.filters.page_current = value;
+                this.getList(this.filters);
+            },
+            // 多选监听
+            handleSelectionChange(value) {
+                let ids = value.map(function (value) {
+                    return value.id;
+                });
+                this.multipleData = ids;
+            },
+            searchSubmit() {
+                // 搜索后初始化列表至首页
+                this.filters.page_current = 1;
+                this.page.current = 1;
+                // 设置搜索用户名
+                this.filters.username = this.search;
+                this.getList(this.filters);
+            },
+            // 监听多选
+            watchMultipleData(newData, oldData) {
+                this.deleteDisabled = newData.length > 0 ? false : true;
+            },
+            // 重置筛选
+            restFilters() {
+                let is_empty = Object.keys(this.filters).length;
+                if(is_empty < 1) {
+                    return false;
+                }
+                this.search = "";
+                this.filters = {};
+                this.getList(this.filters);
+            },
+            // 新增修改 dialogForm
+            dialogForm(row = {}) {
+                this.dialogFormVisible = true;
+                if(Object.keys(row).length > 1) {
+                    // 修改
+                    row.contact || (row.contact = {});
+                    this.form = row;
+                    this.dialogTitle = "修改用户";
+                    // 设置请求方式
+                    this.formSubmitConfig.method = "PUT";
+                    // 设置提交地址
+                    this.formSubmitConfig.url = "/user/"+row.id;
+                } else {
+                    // 新增
+                    this.dialogTitle = "新增用户";
+                    // 清空表单数据
+                    this.form = this.$options.data().form;
+                    // 设置请求方式
+                    this.formSubmitConfig.method = "POST";
+                    // 设置提交地址
+                    this.formSubmitConfig.url = "/user";
+                }
+            },
+            // 删除单条数据
+            deleteData(row) {
+                this.$confirm('是否需要删除该用户?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    // 设置请求方式
+                    this.formSubmitConfig.method = "DELETE";
+                    // 设置提交地址
+                    this.formSubmitConfig.url = "/user/"+row.id;
+                    // 清空表单多余数据
+                    this.form = this.$options.data().form;
+                    // 提交数据
+                    this.dialogFormSubmit();
+                });
+            },
+            // 批量删除
+            deletionData() {
+                this.$confirm('是否需要删除勾选用户?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    // 设置请求方式
+                    this.formSubmitConfig.method = "DELETE";
+                    // 设置提交地址
+                    this.formSubmitConfig.url = "/user";
+                    // 提交数据
+                    this.dialogFormSubmit({ids: this.multipleData});
+                });
+            },
+            // 提交数据
+            dialogFormSubmit(data = {}) {
+                // 先初始化错误表单
+                this.formErrorMsg = this.$options.data().formErrorMsg;
+                // 提交表单
+                this.formLoading = true;
+                axios({
+                    method: this.formSubmitConfig.method,
+                    url: this.formSubmitConfig.url,
+                    data: data
+                }).then((response) => {
+                    this.formLoading = false;
+                    let data = response.data;
+                    if(data.code !== 1) {
+                        Object.assign(this.formErrorMsg, data.message);
+                        this.formLoading = false;
+                        return ;
+                    }
+                    // 关闭 dialogForm
+                    this.dialogFormVisible = false;
+                    this.$message.success(data.message);
+                    // 初始化筛选, 刷新数据
+                    this.restFilters();
+                    this.getList();
+                }).catch((error) => {
+                    this.formLoading = false;
+                    this.$message.error('操作失败');
+                });
+            }
+        },
+        computed: {
+            // 联系信息
+            contact() {
+                return function (data) {
+                    let text_types = {qq: "ＱＱ", wx: "微信", phone: "手机"};
+                    let result = "";
+                    for (const key in data) {
+                        if(text_types[key] && data[key]) {
+                            result += `
+                                <div>
+                                    <span> ${text_types[key]}：${data[key]} </span>
+                                </div>
+                            `;
+                        }
+                    }
+                    result || (result = "暂无");
+                    return result;
+                };
+            },
+            // 状态过滤选项
+            statusFilter() {
+                return [
+                    { text: "禁用", value: 0 },
+                    { text: "正常", value: 1 }
+                ]
+            },
+            // 状态过滤选项
+            isAdminFilter() {
+                return [
+                    { text: "普通用户", value: 0 },
+                    { text: "管理员", value: 1 }
+                ]
+            }
+        },
+        created() {
+            // 初始化数据
+            this.getList();
+        },
+        watch: {
+            multipleData: 'watchMultipleData',
         }
     });
 </script>
-{@/block}
-{@block name="script"}
-
 {@/block}

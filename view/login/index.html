@@ -3,20 +3,14 @@
 <head>
     <meta charset="utf-8" />
     <title>登录</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     {@:token_meta()}
-
-    <!-- App css -->
-    <link href="__StaticVertical__/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-    <link href="__StaticVertical__/css/icons.min.css" rel="stylesheet" type="text/css" />
-    <link href="__StaticVertical__/css/app.min.css" rel="stylesheet" type="text/css" />
-
+    {@include file="layout/_style"}
 </head>
 
 <body class="authentication-bg">
 
 <div id="app" v-cloak>
-    <loading :is-loading="isLoading"></loading>
     <div class="account-pages mt-5 mb-5">
         <div class="container">
             <div class="row justify-content-center">
@@ -58,7 +52,9 @@
                                 </div>
 
                                 <div class="form-group mb-0 text-center">
-                                    <button class="btn btn-primary btn-block" @click="onSubmitLogin" type="button"> 登录 </button>
+                                    <button class="btn btn-primary btn-block"
+                                            v-loading="loading"
+                                            @click="onSubmitLogin" type="button"> 登录 </button>
                                 </div>
 
                             </form>
@@ -78,19 +74,8 @@
 </div>
 
 
-{@if(env('app_debug', config('app.show_error_msg')))}
-<!-- 开发版本 -->
-{@js href="__StaticLibVue__/vue.js"}
-{@js href="__StaticLibAxios__/axios.js"}
-{@else /}
-<!-- 生产版本 -->
-{@js href="__StaticLibVue__/vue.min.js"}
-{@js href="__StaticLibAxios__/axios.min.js"}
-{@/if}
-{@js href="__StaticJS__/axios.config.js"}
-{@js href="__StaticJS__/plugin/loading.js"}
+{@include file="layout/_vue-script"}
 <script>
-    Vue.use(loadingPlugin);
     const vm = new Vue({
         el: '#app',
         data() {
@@ -102,31 +87,35 @@
                     remember: false,
                 },
                 captchaSrc: 'captcha.html',
-                isLoading: false,
+                loading: false,
             }
         },
         methods: {
             // 提交登录
             onSubmitLogin() {
-                this.isLoading = true;
+                this.loading = true;
                 // 刷新验证码
                 this.refreshCaptcha();
                 axios.post("{@:url('login')}", this.loginForm)
                 .then(response => {
                     let data = response.data;
                     if(data.code !== 1) {
-                        toastr['error'](data.message);
-                        this.isLoading = false;
+                        this.$message.error(data.message);
+                        this.loading = false;
                         return ;
                     }
-                    toastr['success'](data.message);
+                    this.$message.success(data.message);
                     setTimeout(()=>{
                         window.location.href = data.url;
-                    }, 1000)
+                    }, 1000);
+                    setTimeout(() => {
+                        this.loading = false;
+                        this.$message.error("登录超时, 请刷新");
+                    }, 5000);
                 })
                 .catch(error => {
-                    this.isLoading = false;
-                    toastr['error']('登录失败');
+                    this.loading = false;
+                    this.$message.error("登录失败");
                 });
             },
             // 刷新验证码
@@ -139,16 +128,8 @@
                 this.captchaSrc = captchaSrc+'?'+Math.random();
             }
         },
-        mounted() {
-
-        }
     });
 </script>
-<!-- App js -->
-{@js href="__StaticVertical__/js/vendor.min.js"}
-{@js href="__StaticVertical__/js/app.min.js"}
-{@js href="__StaticJS__/common.js"}
-
-{@include file="import/_message"}
+{@include file="layout/_other-script"}
 </body>
 </html>

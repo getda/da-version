@@ -24,3 +24,7 @@ Route::get('/center', '\app\controller\Index@center')->name('center');
 
 // 用户管理 资源路由
 Route::resource('/user', '\app\controller\User')->name('user');
+// 获取用户列表
+Route::post('user/list', '\app\controller\User@list')->name('user.list');
+// 批量删除用户
+Route::delete('user', '\app\controller\User@deletion')->name('user.deletion');

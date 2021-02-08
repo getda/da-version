@@ -15,5 +15,6 @@
             'param_error'       => -2,  // 参数为空或错误
             'opera_error'       => -3,  // 操作失败
             'data_error'        => -4,  // 数据不存在或不匹配
+            'auth_error'        => -5,  // 权限不足
         ],
     ];
