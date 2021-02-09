@@ -1,0 +1,210 @@
+{@extend name="layout/default"}
+{@block name="style"}
+<style>
+    .logo-uploader .el-upload {
+        border: 1px dashed #d9d9d9;
+        border-radius: 6px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    .logo-uploader .el-upload:hover {
+        border-color: #409EFF;
+    }
+    .logo-uploader-icon {
+        font-size: 28px;
+        color: #8c939d;
+        width: 180px;
+        height: 50px;
+        line-height: 50px;
+        text-align: center;
+    }
+    .up-logo {
+        width: 180px;
+        height: 50px;
+        display: block;
+    }
+</style>
+{@/block}
+{@block name="content"}
+    <el-tabs v-model="activeName" @tab-click="handleTabClick" v-loading="listLoading">
+            <el-tab-pane label="基础配置" name="base">
+                <el-form label-width="100px"
+                         label-position="left"
+                         size="small"
+                         :model="configForm">
+                    <el-row :gutter="10">
+                        <el-col :xs="24" :md="12" :xl="10">
+                            <el-form-item label="网站名称">
+                                <el-input type="text" v-model="configForm.base.title"></el-input>
+                            </el-form-item>
+                            <el-form-item label="SEO关键词">
+                                <el-input type="text" v-model="configForm.base.keywords" placeholder="多个用英文逗号分割"></el-input>
+                            </el-form-item>
+                            <el-form-item label="SEO描述">
+                                <el-input type="textarea" v-model="configForm.base.description"></el-input>
+                            </el-form-item>
+                            <el-form-item label="LOGO上传">
+                                <el-upload class="logo-uploader"
+                                        action="{@:url('/upload/image')}"
+                                        name="image"
+                                        :show-file-list="false"
+                                        :on-success="handleLogoSuccess"
+                                        :before-upload="beforeLogoUpload">
+                                    <img v-if="configForm.base.logo" :src="configForm.base.logo" class="up-logo">
+                                    <i v-else class="el-icon-plus logo-uploader-icon"></i>
+                                </el-upload>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </el-form>
+            </el-tab-pane>
+            <el-tab-pane label="上传配置" name="upload">
+                <el-form label-width="100px"
+                         label-position="left"
+                         size="small"
+                         :model="configForm">
+                    <el-row :gutter="10">
+                        <el-col :xs="24" :md="12" :xl="10">
+                            <el-form-item label="文件大小">
+                                <el-input type="text" v-model="fileSize">
+                                    <template slot="append">MB</template>
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item label="文件类型">
+                                <el-input type="text" v-model="configForm.upload.file_type" placeholder="多个用英文逗号分割"></el-input>
+                            </el-form-item>
+                            <el-form-item label="图片大小">
+                                <el-input type="text" v-model="imageSize">
+                                    <template slot="append">MB</template>
+                                </el-input>
+                            </el-form-item>
+                            <el-form-item label="图片类型">
+                                <el-input type="text" v-model="configForm.upload.image_type" placeholder="多个用英文逗号分割"></el-input>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </el-form>
+            </el-tab-pane>
+    </el-tabs>
+    <el-button type="primary" @click="saveSubmit" v-loading="saveLoading">保存</el-button>
+    <el-popconfirm
+            @confirm="restConfig"
+            title="所有配置恢复至保存前？">
+        <el-button type="info" slot="reference">重置</el-button>
+    </el-popconfirm>
+{@/block}
+
+{@block name="vue-script"}
+<script>
+    const vm = new Vue({
+        el: '#app',
+        data() {
+            return {
+                listLoading: false,
+                logoLoading: false,
+                saveLoading: false,
+                activeName: 'base',
+                configForm: {
+                    base: { logo: ""  },
+                    upload: { file_size: 0, image_size: 0},
+                },
+            }
+        },
+        methods: {
+            // Tab 切换监听
+            handleTabClick(tab, event) {
+
+            },
+            // 上传前回调
+            beforeLogoUpload(file) {
+                console.log(file)
+                if(file.size > {@:config('siteconfig.upload.image_size') ?: 5*1024*1024}) {
+                    this.$message.error("超出可上传大小");
+                }
+                this.logoLoading = true;
+            },
+            // 上传成功回调
+            handleLogoSuccess(res, file) {
+                this.logoLoading = false;
+                if(res.code !== 1) {
+                    this.$message.error(res.message);
+                    return ;
+                }
+                this.$message.success(res.message);
+                this.configForm.base.logo = res.data;
+            },
+            // 重置配置
+            restConfig() {
+                this.getConfig();
+            },
+            // 保存配置信息
+            saveSubmit() {
+                this.saveLoading = true;
+                axios({
+                    method: 'PUT',
+                    url: '/config',
+                    data: {config: this.configForm}
+                }).then((response) => {
+                    this.saveLoading = false;
+                    let data = response.data;
+                    if(data.code !== 1) {
+                        this.$message.error(data.message);
+                        return ;
+                    }
+                    this.$message.success(data.message);
+                }).catch((error) => {
+                    this.saveLoading = false;
+                    this.$message.error('操作失败');
+                });
+            },
+            // 获取配置
+            getConfig() {
+                this.listLoading = true;
+                axios({
+                    method: 'GET',
+                    url: '/config',
+                }).then((response) => {
+                    this.listLoading = false;
+                    let data = response.data;
+                    if(data.code !== 1) {
+                        this.$message.error(data.message);
+                        return ;
+                    }
+                    this.configForm = this.$options.data().configForm;
+                    // 获取成功合并数据
+                    Object.assign(this.configForm, data.data);
+                }).catch((error) => {
+                    this.listLoading = false;
+                    this.$message.error('操作失败');
+                });
+            }
+        },
+        computed: {
+            // 文件大小单位转换
+            fileSize: {
+                get() {
+                    return this.configForm.upload.file_size/1024/1024 || "";
+                },
+                set(newValue) {
+                    this.configForm.upload.file_size = parseInt(newValue)*1024*1024;
+                }
+
+            },
+            // 图片大小单位转换
+            imageSize: {
+                get() {
+                    return this.configForm.upload.image_size/1024/1024 || "";
+                },
+                set(newValue) {
+                    this.configForm.upload.image_size = parseInt(newValue)*1024*1024;
+                }
+            }
+        },
+        created() {
+            // 初始化配置信息
+            this.getConfig();
+        }
+    });
+</script>
+{@/block}

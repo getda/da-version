@@ -429,7 +429,6 @@
                     let data = response.data;
                     if(data.code !== 1) {
                         Object.assign(this.formErrorMsg, data.message);
-                        this.formLoading = false;
                         return ;
                     }
                     // 关闭 dialogForm

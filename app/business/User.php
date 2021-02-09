@@ -65,7 +65,7 @@ class User extends Base
         $userModel = new UserModel();
         $result = $userModel::create($param);
 
-        return isset($result->id) ? [config('status.api.success'), '创建成功'] : [config('status.api.opera_error'), '创建失败'];
+        return isset($result->id) ? [config('status.api.success'), '创建成功'] : [config('status.api.un_error'), '创建失败'];
     }
 
     /**
@@ -117,7 +117,7 @@ class User extends Base
         // 修改数据
         $result = $userModel::update($param);
 
-        return isset($result->id) ? [config('status.api.success'), '修改成功'] : [config('status.api.opera_error'), '修改失败'];
+        return isset($result->id) ? [config('status.api.success'), '修改成功'] : [config('status.api.un_error'), '修改失败'];
     }
 
     /**

@@ -2,6 +2,8 @@
 namespace app\business;
 
 use app\model\User;
+use think\exception\ValidateException;
+use think\facade\Config;
 use think\facade\Cookie;
 use think\facade\Session;
 
@@ -103,6 +105,55 @@ class Base
             return true;
         }
         return $this->runLogin();
+    }
+
+    /**
+     * 上传
+     * @param array $param
+     * @param string $type
+     */
+    public function upload($param = [], $type = "image")
+    {
+        $param_type = ['image', 'file'];
+        $param_key = array_keys($param);
+        // 判断是否包含指定 name 值的文件数据
+        if(!(count(array_intersect($param_type, $param_key)) > 0)) {
+            return [config('status.api.param_error'), "表单 name 仅可为 image/file"];
+        }
+        if(!in_array($type, $param_type)) {
+            return [config('status.api.param_error'), "类型参数错误"];
+        }
+        switch ($type) {
+            case 'file':
+                // 上传文件
+                $file_size = "fileSize:". (Config::get('siteconfig.upload.file_size') ?: 10*1024*1024);
+                $file_ext = "fileExt:". (Config::get('siteconfig.upload.file_type') ?: "zip,rar,apk,iec");
+                $rule = [
+                    'file' => $file_size. '|' .$file_ext,
+                ];
+                break;
+            default:
+                // 默认上传图片
+                $file_size = "fileSize:". (Config::get('siteconfig.upload.image_size') ?: 5*1024*1024);
+                $file_ext = "fileExt:". (Config::get('siteconfig.upload.image_type') ?: "jpg,png,gif,jpeg");
+                $rule = [
+                    'image' => $file_size. '|' .$file_ext,
+                ];
+                break;
+        }
+
+        // 验证
+        try {
+            validate($rule)->check($param);
+            // 执行上传
+            $uploadResult = \think\facade\Filesystem::disk('public')->putFile( $type, $param[$type]);
+        } catch (ValidateException $validateException) {
+            return [config('status.api.opera_error'), $validateException->getError()];
+        }
+
+        $uploadResult = str_replace('\\', '/', $uploadResult);
+
+        return $uploadResult ? [config('status.api.success'), "上传成功", config('filesystem.disks.public.url'). "/" .$uploadResult] : [config('status.api.un_error'), "上传失败"];
     }
 
 }

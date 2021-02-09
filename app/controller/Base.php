@@ -4,6 +4,7 @@ namespace app\controller;
 
 use app\BaseController;
 use app\business\Base as BaseBusiness;
+use think\Request;
 
 class Base extends BaseController
 {
@@ -69,6 +70,20 @@ class Base extends BaseController
     {
         $baseBusiness = new BaseBusiness();
         return $baseBusiness->isLogin();
+    }
+
+    /**
+     * 上传
+     * @param Request $request
+     * @param string $type
+     * @return \think\response\Json
+     */
+    public function upload(Request $request, $type = "image")
+    {
+        $param = $request->file();
+
+        $baseBusiness = new BaseBusiness();
+        return $this->apiReturn($baseBusiness->upload($param, $type));
     }
 
 }

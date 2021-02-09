@@ -20,8 +20,7 @@ class User extends Validate
      * 定义验证规则
      * 格式：'字段名' =>  ['规则1','规则2'...]
      *
-     * @var array
-     */
+     * @var array     */
     protected $rule = [
         'username|用户名' => 'require|min:3|max:20|regex:username|unique:user|checkUnique',
         'password|密码' => 'require|min:6|max:18|regex:password',

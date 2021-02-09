@@ -28,3 +28,13 @@ Route::resource('/user', '\app\controller\User')->name('user');
 Route::post('user/list', '\app\controller\User@list')->name('user.list');
 // 批量删除用户
 Route::delete('user', '\app\controller\User@deletion')->name('user.deletion');
+
+// 系统设置
+Route::get('setting', '\app\controller\Config@index')->name('setting');
+// 获取所有配置
+Route::get('config', '\app\controller\Config@allConfig')->name('config');
+// 更新配置
+Route::put('config', '\app\controller\Config@update')->name('config');
+
+// 文件/图片上传
+Route::post('upload/<type>', 'app\controller\Base@upload')->name('upload');
